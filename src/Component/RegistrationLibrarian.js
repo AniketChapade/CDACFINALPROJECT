@@ -1,5 +1,6 @@
 import React, { useState, useReducer } from 'react';
 import { Navigate } from 'react-router-dom';
+import AdminDashboard from './Admin';
 
 const init = {
   email: '',
@@ -8,11 +9,11 @@ const init = {
   firstname: '',
   lastname: '',
   address: '',
-  roll_id: ''
+  roll_id: '2',
+  educational_qualification:'',
+  aadhar_id: ''
  
 };
-
-const roles = ['User', 'Librarian'];
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -25,22 +26,23 @@ const reducer = (state, action) => {
   }
 };
 
-const RegistrationForm = () => {
+const RegistrationLibrarianForm = () => {
   const [formData, dispatch] = useReducer(reducer, init);
   const [validationErrors, setValidationErrors] = useState({});
   
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    console.log(value)
+    console.log(value);
     dispatch({ type: 'update', fld: name, val: value });
-
+  
     const emailRegex = /^[\w._#-]{4,20}@[\w]{5,15}\.[a-z]{3}$/;
     const mobile_noRegex = /^\d{10}$/;
     const passwordRegex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/;
-
+    const aadhar_idRegex = /^\d{12}$/;
+  
     const newValidationErrors = { ...validationErrors };
-
+  
     if (name === 'email' && !emailRegex.test(value)) {
       newValidationErrors.email = 'Invalid email format';
     } else if (name === 'userId' && value.trim() === '') {
@@ -51,12 +53,15 @@ const RegistrationForm = () => {
     } else if (name === 'password' && !passwordRegex.test(value)) {
       newValidationErrors.password =
         'Password must contain at least one letter, one number, and one special character';
+    } else if (name === 'aadhar_id' && !aadhar_idRegex.test(value)) {
+      newValidationErrors.aadhar_id = 'Please enter a correct 12-digit Aadhar Number';
     } else {
       delete newValidationErrors[name];
     }
-
+  
     setValidationErrors(newValidationErrors);
   };
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -69,7 +74,7 @@ const RegistrationForm = () => {
     setValidationErrors({});
 
     try {
-        const response = await fetch('http://localhost:8080/userRegister', {
+        const response = await fetch('http://localhost:8080/LibrarianRegister', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -82,8 +87,9 @@ const RegistrationForm = () => {
                 mobileNo:formData.mobile_no,
                 email:formData.email,
                 roll_id:formData.roll_id,
-                password:formData.password
-
+                password:formData.password,
+                aadhar_id:formData.aadhar_id,
+                educational_qualification:formData.educational_qualification,
               }
             ),
         });
@@ -103,9 +109,12 @@ const RegistrationForm = () => {
         console.error('Error during registration:', error);
     }
 };
-  return (
-<div className="container mt-5 login-form-container col-6"  style={{ backgroundColor: 'lightgrey', padding: '20px', border: '1px solid ', borderRadius: '10px' }}>
 
+  
+  return (
+    
+<div className="container mt-5 login-form-container col-6"  style={{ backgroundColor: 'lightgrey', padding: '20px', border: '1px solid ', borderRadius: '10px' }}>
+     
       <h2 className="text-center mb-4">Registration Form</h2>
       <form onSubmit={handleSubmit}>
         <div className="row">
@@ -194,9 +203,37 @@ const RegistrationForm = () => {
               required
             />
           </div>
+          <div className="mb-4 col-md-6">
+            <label htmlFor="educational_qualification" className="form-label">
+              Educational Qualification
+            </label>
+            <input
+              type="text"
+              className="form-control"
+              id="educational_qualification"
+              name="educational_qualification"
+              value={formData.educational_qualification}
+              onChange={handleInputChange}
+              required
+            />
+          </div>
 
-         
-
+          <div className="mb-4 col-md-6">
+            <label htmlFor="aadhar_id" className="form-label">
+              Aadhar Number
+            </label>
+            <input
+              type="text"
+              className="form-control"
+              id="aadhar_id"
+              name="aadhar_id"
+              value={formData.aadhar_id}
+              onChange={handleInputChange}
+              required
+            />
+           <div className="text-danger">{validationErrors.aadhar_id}</div>
+          </div>
+ 
           <div className="mb-4 col-md-6">
             <label htmlFor="roll_id" className="form-label">
               Role
@@ -208,11 +245,9 @@ const RegistrationForm = () => {
               value={formData.roll_id}
               onChange={handleInputChange}
               required
+              disabled
             >
-              <option value=""></option>
-              <option value="1">User</option>
-              <option value="2">Librarian</option>
-              
+              <option value="2">Librarian</option> 
             </select>
           </div>
 
@@ -225,7 +260,8 @@ const RegistrationForm = () => {
         </button>
       </form>
     </div>
+  
   );
 };
 
-export default RegistrationForm;
+export default RegistrationLibrarianForm;

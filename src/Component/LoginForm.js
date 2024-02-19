@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import WelcomePage from "./WelcomePage";
 
 const LoginForm = () => {
   const [formData, setFormData] = useState({
@@ -9,6 +10,7 @@ const LoginForm = () => {
 
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({ email: "", password: "" });
+  const [roll_id, setRoleId] = useState(null);
 
   const navigate = useNavigate();
 
@@ -48,26 +50,34 @@ const LoginForm = () => {
         const data = await response.json();
         console.log("Login successful:", data);
 
-        localStorage.setItem("loggedInUser", formData.email);
+        localStorage.setItem("role", data.rollId.roll_id);
 
-        alert("Login successful");
+      
+       if(data.rollId.roll_id===3)
+       navigate('/AdminPage')
+
+       else if(data.rollId.roll_id===2)
+       navigate('/LibrarianPage')
+
+       else if(data.rollId.roll_id===1)
+        navigate('/CustomerPage')
         
-        navigate("/dashboard");
       } else {
         console.error("Login failed");
         alert("Please enter valid email and password.");
       }
     } catch (error) {
       console.error("Error during login:", error);
-      alert("Invalid email or password");
+      alert("Internal server error");
     }
-  };
+  };  
 
   const toggleShowPassword = () => {
     setShowPassword(!showPassword);
   };
 
   return (
+   
     <div
       className="container mt-5 login-form-container col-4"
       style={{
@@ -123,11 +133,10 @@ const LoginForm = () => {
         >
           Login
         </button>
-        <p>
-          Don't have an account? <a href="/Signup">Signup</a>
-        </p>
+      
       </form>
     </div>
+   
   );
 };
 
